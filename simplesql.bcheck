@@ -1,0 +1,30 @@
+metadata:
+    language: v2-beta
+    name: "Check for simple SQL injection"
+    description: "Application may be vulnerbale to SQL inejction"
+    author: "Rounak Dhadiwal "
+
+define:
+    error_payload = `'`
+    balancing_payload = `''`
+
+# we will automatically insert into nested insertion points
+given any insertion point then
+    send payload called check:
+        appending: {error_payload}
+        
+        if {check.response} differs from {base.response} then
+            send payload called check_balance:
+                appending: {balancing_payload}
+                    if {check_balance.response} is {base.response} or {check_balance.response.body} is {base.response.body} then
+                        report issue:
+                            severity: high
+                            confidence: certain
+                            detail: "A SQL injection vulnerability "
+                            remediation: "Recheck"
+                    end if
+        end if
+
+                        
+        
+    
